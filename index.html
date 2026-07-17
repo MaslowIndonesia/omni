@@ -1,0 +1,226 @@
+<meta charset="utf-8">
+<title>Numen — Institutional Fund · Automate Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --ink:#0b1020; --panel:#111830; --panel2:#0e1428; --line:#20294a;
+  --text:#e8ecf6; --dim:#8b97b8; --faint:#5a6488;
+  --gold:#e6b450; --ok:#4ec98f; --warn:#e6b450; --crit:#f2665e; --idle:#5a6488;
+  --live:#4ec98f;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:light){:root{
+  --ink:#eaecf1;--panel:#f8f9fc;--panel2:#eef0f5;--line:#d6dae4;
+  --text:#161b28;--dim:#525c74;--faint:#828aa0;--gold:#9a6f16;--ok:#2f9e6b;--idle:#a0a6b8;--live:#2f9e6b;
+}}
+:root[data-theme="dark"]{--ink:#0b1020;--panel:#111830;--panel2:#0e1428;--line:#20294a;--text:#e8ecf6;--dim:#8b97b8;--faint:#5a6488;--gold:#e6b450;--ok:#4ec98f;--idle:#5a6488;--live:#4ec98f;}
+:root[data-theme="light"]{--ink:#eaecf1;--panel:#f8f9fc;--panel2:#eef0f5;--line:#d6dae4;--text:#161b28;--dim:#525c74;--faint:#828aa0;--gold:#9a6f16;--ok:#2f9e6b;--idle:#a0a6b8;--live:#2f9e6b;}
+*{box-sizing:border-box;margin:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.5;font-feature-settings:"tnum";-webkit-font-smoothing:antialiased;padding:0 0 4rem}
+.wrap{max-width:1120px;margin:0 auto;padding:0 1.25rem}
+.mono{font-family:var(--mono)} .dim{color:var(--dim)}
+.lbl{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.num{font-family:var(--mono);text-align:right;color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* masthead + live loop cards */
+header.top{border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),transparent);position:sticky;top:0;z-index:5;backdrop-filter:blur(8px)}
+.mast{display:flex;align-items:baseline;gap:.9rem;flex-wrap:wrap;padding:1.1rem 0 .9rem}
+.mast h1{font-family:var(--mono);font-size:1.05rem;font-weight:600;letter-spacing:.02em}
+.mast .g{color:var(--gold)} .mast .spacer{flex:1} .mast .who{color:var(--dim);font-size:.8rem;font-family:var(--mono)}
+.loops{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line)}
+@media(max-width:640px){.loops{grid-template-columns:1fr}}
+.loop{padding:.85rem 1rem;border-right:1px solid var(--line);display:flex;align-items:center;gap:.9rem}
+.loop:last-child{border-right:0}
+.livebadge{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--live)}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 var(--live);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--live) 70%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media(prefers-reduced-motion:reduce){.pulse{animation:none}}
+.loop .body{flex:1}
+.loop .name{font-weight:600;font-size:.9rem}
+.loop .meta{font-family:var(--mono);font-size:.74rem;color:var(--dim);margin-top:.15rem}
+.loop .next{font-family:var(--mono);font-size:.82rem;color:var(--gold);font-weight:600}
+.loop .nextlbl{font-size:.62rem}
+
+section{margin-top:2rem}
+.shead{display:flex;align-items:baseline;gap:.7rem;margin-bottom:.85rem}
+.shead h2{font-size:.95rem;font-weight:600} .shead .rule{flex:1;height:1px;background:var(--line)}
+
+/* goal cards */
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.85rem}
+.goal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;transition:border-color .2s,transform .2s}
+.goal:hover{border-color:color-mix(in srgb,var(--gold) 45%,var(--line));transform:translateY(-2px)}
+.goalhead{display:flex;align-items:center;gap:.5rem}
+.goal h3{font-size:.9rem;font-weight:600;line-height:1.3}
+.plain{font-family:var(--mono);font-size:.72rem;color:var(--faint);margin:.15rem 0 .7rem;padding-left:1rem}
+.gval{font-family:var(--mono);font-size:1rem;font-weight:600;color:var(--gold)}
+.gval.idle{font-size:.82rem;font-weight:400;color:var(--faint)}
+.gsub{color:var(--dim);font-size:.78rem;margin-top:.5rem;line-height:1.5}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.dot.ok{background:var(--ok);box-shadow:0 0 7px color-mix(in srgb,var(--ok) 60%,transparent)}
+.dot.warn{background:var(--warn)} .dot.crit{background:var(--crit)} .dot.idle{background:var(--idle)}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+@media(max-width:760px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.15rem;min-width:0}
+.panel h3{font-size:.82rem;font-weight:600;margin-bottom:.85rem;display:flex;gap:.5rem;align-items:center}
+.panel h3 .dot{align-self:center}
+
+/* tables + lists */
+table{width:100%;border-collapse:collapse;font-size:.8rem;table-layout:fixed}
+th{text-align:left;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);padding:0 0 .5rem;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:.5rem 0;border-bottom:1px solid var(--line);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.num,th.r{width:64px;text-align:right}
+tr:last-child td{border-bottom:0}
+td .dot{margin-right:.4rem}
+ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+ul.pushed li{display:flex;align-items:baseline;gap:.6rem;font-size:.8rem}
+.tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;padding:.12rem .4rem;border-radius:4px;flex:none;border:1px solid var(--line)}
+.tag.ai{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+.tag.py{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+.tag.up{color:var(--dim)}
+.pmsg{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
+.page{flex:none;font-size:.72rem}
+ul.plainlist li{font-size:.8rem;color:var(--dim);border-left:2px solid color-mix(in srgb,var(--gold) 30%,transparent);padding-left:.7rem;line-height:1.45}
+ul.best li{display:flex;gap:.6rem;align-items:baseline;font-size:.8rem}
+ul.best .k{font-family:var(--mono);text-transform:uppercase;font-size:.62rem;letter-spacing:.1em;color:var(--faint);width:56px;flex:none}
+ul.best code{font-family:var(--mono);font-size:.72rem;flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis}
+ul.best .v{font-family:var(--mono);color:var(--gold);font-weight:600}
+ul.finds li{display:flex;gap:.6rem;align-items:baseline;font-size:.79rem}
+ul.finds code{font-family:var(--mono);font-size:.66rem;color:var(--gold);flex:none}
+ul.finds span{color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:var(--faint);font-style:italic;font-size:.78rem;border:0!important;padding-left:0!important}
+.fabup{margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--line);font-size:.76rem;color:var(--dim)}
+.sparkwrap{display:flex;align-items:center;gap:1rem}
+svg.spark{width:100%;height:32px;overflow:visible}
+svg.spark polyline{fill:none;stroke:var(--gold);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.big{font-family:var(--mono);font-size:1.8rem;font-weight:600;color:var(--gold);line-height:1}
+footer{margin-top:2.2rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--faint);font-size:.72rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-family:var(--mono)}
+</style>
+
+<header class="top">
+  <div class="wrap mast">
+    <h1><span class="g">◆</span> NUMEN <span style="color:var(--faint)">/ institutional fund · automate console</span></h1>
+    <span class="spacer"></span><span class="who">maslow.indonesia@gmail.com</span>
+  </div>
+  <div class="wrap"><div class="loops">
+    <div class="loop">
+      <span class="livebadge"><span class="pulse"></span>Live</span>
+      <div class="body"><div class="name">Python runs <span class="dim" style="font-weight:400;font-size:.78rem">· free, every ~2.4h</span></div>
+        <div class="meta">last ran 10 min ago · 17 runs today</div></div>
+      <div style="text-align:right"><div class="nextlbl lbl">next run</div><div class="next" id="engnext">—</div></div>
+    </div>
+    <div class="loop">
+      <span class="livebadge"><span class="pulse"></span>Live</span>
+      <div class="body"><div class="name">AI review <span class="dim" style="font-weight:400;font-size:.78rem">· Fable-5, once a day</span></div>
+        <div class="meta">last ran 17.9 hours ago · consistency PASS</div></div>
+      <div style="text-align:right"><div class="nextlbl lbl">next review</div><div class="next" id="blnext">—</div></div>
+    </div>
+  </div></div>
+</header>
+
+<main class="wrap">
+  <section>
+    <div class="shead"><h2>Your goals — where each project stands</h2><span class="rule"></span></div>
+    <div class="goals"><article class="goal">
+  <div class="goalhead"><span class="dot ok"></span><h3>Trading — Grow returns, shrink losses</h3></div>
+  <div class="plain">HL Institutional Funds</div>
+  <div class="gval">top idea rank-score 0.7106 (search ranking, NOT a Calmar — rises with search length; real only after gates + forward days)</div>
+  <p class="gsub">6192 ideas tested this run · goal: CAGR up, drawdown down · nothing promoted until 126 forward days + human sign-off</p>
+</article>
+<article class="goal">
+  <div class="goalhead"><span class="dot ok"></span><h3>ODP Revenue — Sell more per ad dollar</h3></div>
+  <div class="plain">ourdailypets.com</div>
+  <div class="gval idle">measuring — no result yet</div>
+  <p class="gsub">goal: proven return-on-ad-spend 2.0+ · cloud watches only, never spends</p>
+</article>
+<article class="goal">
+  <div class="goalhead"><span class="dot ok"></span><h3>SaaS Growth — Ship proven features</h3></div>
+  <div class="plain">Clone Studios + Solo Projekt</div>
+  <div class="gval idle">measuring — no result yet</div>
+  <p class="gsub">goal: uptime, speed, and growth features · proposals only, you approve</p>
+</article></div>
+  </section>
+
+  <section>
+    <div class="shead"><h2>What just happened</h2><span class="lbl">pushed &amp; upgraded</span><span class="rule"></span></div>
+    <div class="cols">
+      <div class="panel">
+        <h3><span class="dot ok"></span>Recent pushes</h3>
+        <ul class="pushed"><li><span class="tag py">Python run</span><span class="pmsg">engine: python run 2026-07-17 17:21Z</span><span class="mono dim page">10 min ago</span></li><li><span class="tag up">upgrade</span><span class="pmsg">feat(console): rebrand to NUMEN / institutional fund (Hans: numen = in</span><span class="mono dim page">10 min ago</span></li><li><span class="tag py">Python run</span><span class="pmsg">engine: python run 2026-07-17 17:15Z</span><span class="mono dim page">15 min ago</span></li><li><span class="tag py">Python run</span><span class="pmsg">engine: python run 2026-07-17 17:15Z</span><span class="mono dim page">16 min ago</span></li><li><span class="tag up">upgrade</span><span class="pmsg">fix(automate): retry-with-rebase publish + show real git errors (was m</span><span class="mono dim page">16 min ago</span></li><li><span class="tag py">Python run</span><span class="pmsg">engine: python run 2026-07-17 17:09Z</span><span class="mono dim page">22 min ago</span></li><li><span class="tag py">Python run</span><span class="pmsg">engine: python run 2026-07-17 16:14Z</span><span class="mono dim page">1.3 hours ago</span></li><li><span class="tag up">upgrade</span><span class="pmsg">fix(engine): resolve conflict markers I pushed — keep the nusantara-fu</span><span class="mono dim page">1.3 hours ago</span></li><li><span class="tag up">upgrade</span><span class="pmsg">feat(console): engine publishes live 24/7 public console to Pages ever</span><span class="mono dim page">1.4 hours ago</span></li></ul>
+      </div>
+      <div class="panel">
+        <h3><span class="dot ok"></span>Run history — free Python checks</h3>
+        <table><thead><tr><th>When</th><th>What</th><th>Checked</th><th class="r">Found</th></tr></thead>
+        <tbody><tr><td class="mono dim">10 min ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr><tr><td class="mono dim">15 min ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr><tr><td class="mono dim">16 min ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr><tr><td class="mono dim">22 min ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr><tr><td class="mono dim">1.3 hours ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr><tr><td class="mono dim">1.5 hours ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">1</td></tr><tr><td class="mono dim">2.3 hours ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">1</td></tr><tr><td class="mono dim">2.6 hours ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">1</td></tr><tr><td class="mono dim">3.9 hours ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr><tr><td class="mono dim">6.7 hours ago</td><td>Python run</td><td class="mono">6 areas checked</td><td class="num">2</td></tr></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="shead"><h2>What the loop is thinking</h2><span class="lbl">AI review vs Python findings</span><span class="rule"></span></div>
+    <div class="cols">
+      <div class="panel">
+        <h3><span class="dot ok"></span>What the AI review instructed <span class="dim" style="font-weight:400;font-size:.7rem">· 17.9 hours ago</span></h3>
+        <ul class="plainlist"><li>upgrade[trading]: gold_lead:bc21a403ba (score=0.6763) re-verified against repos/quant/improve_ledger.json (tests=1, win_dates=[&#x27;2026-07-16&#x27;]) -- NOT a</li></ul><p class="fabup">Latest upgrade: {&#x27;file&#x27;: &#x27;specs/audit-loop.md&#x27;, &#x27;change&#x27;: &quot;Step 1: extended the `gh api` 404/403 handling sentence to also name 5xx (e.g. 503) as a distinct, GitHub-side transient class -- record </p>
+      </div>
+      <div class="panel">
+        <h3><span class="dot ok"></span>What the Python runs found</h3>
+        <div class="sparkwrap"><div><div class="big">72,390</div><div class="lbl">upgrade ideas tested</div></div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0.0,10.5 3.4,10.5 6.9,10.5 10.3,23.5 13.8,23.5 17.2,10.5 20.7,23.5 24.1,10.5 27.6,23.5 31.0,4.0 34.5,10.5 37.9,23.5 41.4,10.5 44.8,10.5 48.3,23.5 51.7,23.5 55.2,23.5 58.6,23.5 62.1,23.5 65.5,23.5 69.0,17.0 72.4,17.0 75.9,23.5 79.3,23.5 82.8,23.5 86.2,17.0 89.7,17.0 93.1,17.0 96.6,17.0 100.0,17.0"/></svg></div>
+        <div class="lbl" style="margin:.9rem 0 .5rem">best idea per goal</div>
+        <ul class="best"><li><span class="k">trading</span><code>gold_lead:2a33f9ea26</code><span class="v">0.7106</span></li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="shead"><h2>Health &amp; findings</h2><span class="rule"></span></div>
+    <div class="cols">
+      <div class="panel">
+        <h3><span class="dot ok"></span>Project repositories</h3>
+        <table><thead><tr><th>Repo</th><th class="r">Last change</th><th>State</th></tr></thead>
+        <tbody><tr><td>claude-loops</td><td class="num">0.0h</td><td><span class="dot ok"></span>live</td></tr>
+<tr><td>quant-research-loop</td><td class="num">—</td><td><span class="dot idle"></span>quiet</td></tr></tbody></table>
+        <p style="margin-top:.8rem;color:var(--faint);font-size:.74rem">Proven-over-time ledger: <b class="mono" style="color:var(--gold)">0</b> results · a trading idea must beat the champion for 126 days before it graduates.</p>
+      </div>
+      <div class="panel">
+        <h3><span class="dot ok"></span>Findings · flaws · new features</h3>
+        <ul class="finds"><li><code>2026-07-16-saas</code><span>SaaS Grow — Fable-5 integrated daily build (2026-07-16, cloud, PROPOSE-ONLY)</span></li><li><code>2026-07-16-odp</code><span>ODP Revenue — Fable-5 integrated daily build (2026-07-16, cloud, MONITOR-ONLY)</span></li><li><code>2026-07-16-hl-funds</code><span>HL Institutional Funds — cloud research directive (2026-07-16, CLOUD shadow, Phase A)</span></li><li><code>2026-07-16-futures-build</code><span>Futures build — cloud Phase B (2026-07-16, CLOUD shadow)</span></li><li><code>2026-07-16-audit</code><span>Audit — Fable-5 integrated daily build (2026-07-16, cloud, Step 1 triage)</span></li></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>updated 17 Jul 2026 · 17:31 UTC · refreshes every Python run</span>
+    <span>every number comes from a real run — blank means no data yet, never guessed</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var eng=[0, 2, 5, 7, 9, 12, 14, 16, 19, 21], bh=22, bm=30;
+  function nextFrom(hours, mins){
+    var now=new Date();
+    for(var d=0; d<2; d++){
+      for(var i=0;i<hours.length;i++){
+        var t=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+d,hours[i],mins||0,0));
+        if(t>now) return t;
+      }
+    }
+    return null;
+  }
+  function fmt(t){
+    if(!t) return "—";
+    var s=Math.max(0,(t-new Date())/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
+    var when=t.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+    return (h>0? h+"h "+m+"m":m+"m") + "  ·  " + when;
+  }
+  function tick(){
+    var e=document.getElementById("engnext"), b=document.getElementById("blnext");
+    if(e) e.textContent=fmt(nextFrom(eng,0));
+    if(b) b.textContent=fmt(nextFrom([bh],bm));
+  }
+  tick(); setInterval(tick, 30000);
+})();
+</script>
