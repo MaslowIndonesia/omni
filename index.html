@@ -1,45 +1,75 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OMNI — Claude Automate</title><style>
-*{margin:0;box-sizing:border-box}body{background:#08080f;color:#e9e9f2;
-font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
-.wrap{max-width:920px;margin:0 auto;padding:34px 20px 60px}
-header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
-h1{font-size:30px;letter-spacing:.22em;font-weight:800}h1 b{color:#7b6cf6}
-.sub{color:#8a8aa4;font-size:13px;margin-bottom:26px}
-.live{margin-left:auto;font-size:12.5px;color:#9a9ab4}
-.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3ad07a;margin-right:6px;animation:p 2s infinite}
+*{margin:0;box-sizing:border-box}body{background:#f4f0e8;color:#2c2721;
+font:14px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:920px;margin:0 auto;padding:32px 20px 64px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-size:16px;line-height:24px;font-weight:500;letter-spacing:0}
+h1 b{color:#a05c33;font-weight:500}
+.status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;
+border-radius:10px;background:#fcfaf5;margin-bottom:12px}
+.status.warn{background:#faf3ea}
+.status.crit{background:#faf0ec}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:14px;line-height:20px;
+font-weight:500;color:#2c2721}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4f7a5e;
+animation:p 2s infinite}
+.status.warn .pulse{background:#a05c33;animation:none}
+.status.crit .pulse{background:#b05244;animation:none}
 @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
-.runners{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:26px}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.ssum{font-size:14px;line-height:20px;font-weight:500;color:#2c2721}
+.smeta{margin-left:auto;font:12px/18px ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+color:#6f665a;font-variant-numeric:tabular-nums}
+.sub{color:#6f665a;font-size:14px;line-height:20px;margin-bottom:24px}
+.runners{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
 @media(max-width:680px){.runners{grid-template-columns:1fr}}
-.card{background:#111120;border:1px solid #1e1e34;border-radius:14px;padding:18px}
-.runner.pending{opacity:.72;border-style:dashed}
-.rhead{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
-.rhead h2{font-size:17px;letter-spacing:.06em}.tag{font-size:11px;color:#7b6cf6}
-.role{font-size:12px;color:#8a8aa4;margin-bottom:12px}
-.lastrun{font-size:13px;margin-bottom:3px}.lastrun b{color:#3ad07a}
-.upg{font-size:12.5px;color:#c0a8ff;margin-bottom:12px}
-.lp{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #17172a;font-size:12.5px}
-.lp b{color:#c8c8dc;font-weight:500}.lp span{color:#8f8fa8}.pend{color:#6a6a86;font-style:italic}
-h3{font-size:11px;letter-spacing:.14em;color:#7b6cf6;text-transform:uppercase;margin:0 0 12px}
-.site{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#111120;
-border:1px solid #1e1e34;border-radius:12px;margin-bottom:9px;color:inherit;text-decoration:none}
-.site:hover{border-color:#3a3a5c;background:#15152a}
-.sn{font-weight:600;font-size:14.5px}.sd{color:#8a8aa4;font-size:12.5px}
-.site .dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:#3ad07a}
-footer{margin-top:30px;font-size:11.5px;color:#5a5a76;text-align:center}
+.card{background:#fcfaf5;border-radius:12px;padding:20px}
+.runner.pending{border:1px dashed #a89d8c}
+.rhead{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.rhead h2{font-size:16px;line-height:24px;font-weight:500;letter-spacing:0}
+.tag{font-size:12px;line-height:18px;font-weight:500;color:#a05c33;
+background:rgba(44,39,33,.045);padding:2px 8px;border-radius:8px}
+.role{font-size:14px;line-height:20px;color:#6f665a;margin-bottom:12px}
+.lastrun{font-size:12px;line-height:18px;color:#a89d8c;margin-bottom:4px}
+.lastrun b{font-size:14px;line-height:20px;font-weight:500;color:#4f7a5e;
+font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.runner.pending .lastrun b{color:#6f665a}
+.upg{font-size:14px;line-height:20px;color:#2c2721;border-left:4px solid #a05c33;
+padding-left:8px;margin-bottom:12px}
+.upg span{color:#a89d8c}
+.lp{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid #e4dccf;
+font-size:14px;line-height:20px}
+.lp:first-child{border-top:none}
+.lp b{color:#2c2721;font-weight:500}
+.lp span:not(.pend){color:#6f665a;
+font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.lp.stale{background:#faf3ea;border-radius:4px}
+.lp.stale span:not(.pend){color:#a05c33;font-weight:500}
+.pend{display:block;color:#6f665a;font-style:italic;font-size:12px;line-height:18px;
+background:rgba(44,39,33,.045);border-radius:8px;padding:8px 12px}
+h3{font-size:12px;line-height:18px;font-weight:500;letter-spacing:.04em;color:#6f665a;
+text-transform:uppercase;margin:0 0 12px}
+.site{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fcfaf5;
+border-radius:12px;margin-bottom:8px;color:inherit;text-decoration:none}
+.site:hover{background:rgba(44,39,33,.045)}
+.sn{font-weight:500;font-size:16px;line-height:24px;color:#2c2721}
+.sd{color:#6f665a;font-size:14px;line-height:20px}
+.site .dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:#4f7a5e;flex:none}
+footer{margin-top:24px;font-size:12px;line-height:18px;color:#6f665a;text-align:center}
 </style></head><body><div class="wrap">
-<header><h1>OMNI<b>·</b>AUTOMATE</h1>
-<span class="live" id="st"><span class="pulse" id="dot"></span><span id="lab">LIVE 24/7</span> · 2026-07-22 11:11 UTC</span></header>
+<header><h1>OMNI<b>·</b>AUTOMATE</h1></header>
+<div class="status ok"><span class="live" id="st"><span class="pulse" id="dot"></span><span id="lab">LIVE 24/7</span></span><span class="ssum">All 5 loops fresh — every last run within cadence</span><span class="smeta">generated 2026-07-22 14:01 UTC · <span id="fresh"></span></span></div>
 <div class="sub">Two runners upgrading every site, skill, and loop — hand in hand, around the clock.</div>
-<div class="runners"><div class="card runner"><div class="rhead"><h2>CLAUDE LOOP</h2><span class="tag">Runner #1 · VPS</span></div><div class="role">loops · findings · funnels · quant · audits</div><div class="lastrun">last run · <b>2026-07-22 11:11</b></div><div class="upg">latest upgrade · —</div><div class="loops"><div class="lp"><b>engine</b><span>2026-07-22 11:11</span></div><div class="lp"><b>audit-loop</b><span>2026-07-22 08:42</span></div><div class="lp"><b>hl-funds</b><span>2026-07-22 11:10</span></div><div class="lp"><b>odp-revenue</b><span>2026-07-22 09:14</span></div><div class="lp"><b>saas-grow</b><span>2026-07-22 04:26</span></div></div></div><div class="card runner pending"><div class="rhead"><h2>KIMI LOOP</h2><span class="tag">Runner #2 · VPS</span></div><div class="role">Kimi 3.0 · UI/UX upgrades · interleaved with Runner #1</div><div class="lastrun">last run · <b>not yet deployed</b></div><div class="upg">latest upgrade · UI/UX upgrades of all sites (scaffolding)</div><div class="loops"><div class="lp"><span class="pend">— pending deployment —</span></div></div></div></div>
+<div class="runners"><div class="card runner"><div class="rhead"><h2>CLAUDE LOOP</h2><span class="tag">Runner #1 · VPS</span></div><div class="role">loops · findings · funnels · quant · audits</div><div class="lastrun">last run · <b>2026-07-22 14:01</b></div><div class="upg"><span>latest upgrade ·</span> no upgrades recorded yet</div><div class="loops"><div class="lp"><b>engine</b><span>2026-07-22 14:01</span></div><div class="lp"><b>audit-loop</b><span>2026-07-22 12:44</span></div><div class="lp"><b>hl-funds</b><span>2026-07-22 11:10</span></div><div class="lp"><b>odp-revenue</b><span>2026-07-22 11:30</span></div><div class="lp"><b>saas-grow</b><span>2026-07-22 04:26</span></div></div></div><div class="card runner pending"><div class="rhead"><h2>KIMI LOOP</h2><span class="tag">Runner #2 · VPS</span></div><div class="role">Kimi 3.0 · UI/UX upgrades · interleaved with Runner #1</div><div class="lastrun">last run · <b>not yet deployed</b></div><div class="upg"><span>latest upgrade ·</span> K3 model pass via direct-API lane, real inputs inlined (CLI rc=124)</div><div class="loops"><div class="lp"><span class="pend">— pending deployment —</span></div></div></div></div>
 <h3>Consoles</h3><a class="site" href="https://maslowindonesia.github.io/nusantara-futures/automate/" target="_blank"><span class="sn">Nusantara Futures</span><span class="sd">Investment / futures surface</span><span class="dot"></span></a><a class="site" href="https://numen-web.vercel.app" target="_blank"><span class="sn">Nusantara Capital</span><span class="sd">IHSG terminal (Vercel app)</span><span class="dot"></span></a><a class="site" href="https://maslowindonesia.github.io/sovereign-quant/" target="_blank"><span class="sn">Sovereign Quant</span><span class="sd">Personal ETF fund tracker</span><span class="dot"></span></a><a class="site" href="https://maslowindonesia.github.io/brands-console/" target="_blank"><span class="sn">Brands Console</span><span class="sd">Multi-brand revenue console</span><span class="dot"></span></a>
-<footer>OMNI — the Claude Automate front door · real ledger data only · <span id="fresh"></span></footer>
+<footer>OMNI — the Claude Automate front door · real ledger data only</footer>
 </div>
 <script>
-(function(){var G=1784718700,age=(Date.now()/1000-G)/3600,d=document.getElementById('dot'),
+(function(){var G=1784728890,age=(Date.now()/1000-G)/3600,d=document.getElementById('dot'),
 l=document.getElementById('lab'),f=document.getElementById('fresh');
 f.textContent='generated '+age.toFixed(1)+'h ago';
-if(age>3.5){l.textContent='STALE · '+age.toFixed(1)+'h since update';d.style.background='#e0a13a';d.style.animation='none';}
-if(age>26){l.textContent='OFFLINE · '+(age/24).toFixed(1)+'d';d.style.background='#e05a5a';}})();
+if(age>3.5){l.textContent='STALE · '+age.toFixed(1)+'h since update';d.style.background='#a05c33';d.style.animation='none';}
+if(age>26){l.textContent='OFFLINE · '+(age/24).toFixed(1)+'d';d.style.background='#b05244';}})();
 </script></body></html>
